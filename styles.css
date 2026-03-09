@@ -74,6 +74,18 @@ h1, h2, h3 {
   color: var(--dark);
 }
 
+.section-label {
+  display: block;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
 .section-title {
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   text-align: center;
@@ -182,15 +194,16 @@ h1, h2, h3 {
 }
 
 .nav-cta {
-  background: var(--gold);
+  background: var(--dark);
   color: #fff !important;
   padding: 10px 20px;
   border-radius: var(--radius);
   font-weight: 600;
+  transition: all var(--transition);
 }
 
 .nav-cta:hover {
-  background: var(--gold-dark);
+  background: var(--gold);
   color: #fff !important;
 }
 
@@ -233,6 +246,8 @@ h1, h2, h3 {
   padding: 10px 0;
   text-align: center;
   margin-top: 64px;
+  overflow: hidden;
+  position: relative;
 }
 
 .top-banner p {
@@ -241,6 +256,12 @@ h1, h2, h3 {
   letter-spacing: 1.5px;
   color: #fff;
   text-transform: uppercase;
+  animation: bannerPulse 3s ease-in-out infinite;
+}
+
+@keyframes bannerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 /* --- Hero --- */
@@ -277,6 +298,24 @@ h1, h2, h3 {
   margin-top: 8px;
 }
 
+.hero-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 32px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--text-light);
+}
+
+.badge-dot {
+  color: var(--gold);
+  font-size: 1rem;
+}
+
 /* --- Stats --- */
 .stats {
   padding: 72px 0;
@@ -303,6 +342,35 @@ h1, h2, h3 {
   color: var(--text-light);
   font-size: 0.95rem;
   line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.stat-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stat-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.stat-bullets li svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.stat-bullets li span {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.stat-bullets li strong {
+  color: var(--dark);
 }
 
 .stat-right {
@@ -315,7 +383,25 @@ h1, h2, h3 {
   font-weight: 800;
   color: var(--dark);
   line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-sublabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.stat-right-desc {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  line-height: 1.6;
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .opportunity-badge {
@@ -324,6 +410,12 @@ h1, h2, h3 {
   padding: 24px;
   color: #fff;
   text-align: left;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.opportunity-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
 
 .opportunity-label {
@@ -342,6 +434,17 @@ h1, h2, h3 {
   color: rgba(255,255,255,0.8);
   font-size: 0.9rem;
   line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.opportunity-tagline {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
 }
 
 /* --- Launch Protocol --- */
@@ -360,6 +463,16 @@ h1, h2, h3 {
 .step-card {
   text-align: center;
   padding: 32px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  border-color: var(--gold);
 }
 
 .step-icon {
@@ -372,6 +485,12 @@ h1, h2, h3 {
   border-radius: 50%;
   background: var(--bg-alt);
   color: var(--gold);
+  transition: background var(--transition), color var(--transition);
+}
+
+.step-card:hover .step-icon {
+  background: var(--gold);
+  color: #fff;
 }
 
 .step-card h3 {
@@ -410,6 +529,13 @@ h1, h2, h3 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.rf-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  border-color: var(--gold);
 }
 
 .rf-icon {
@@ -436,8 +562,8 @@ h1, h2, h3 {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: rgba(200, 162, 60, 0.08);
-  border: 1px solid rgba(200, 162, 60, 0.2);
+  background: rgba(22, 163, 74, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.2);
   border-radius: var(--radius);
   padding: 16px 20px;
   max-width: 700px;
@@ -461,8 +587,12 @@ h1, h2, h3 {
   background: var(--bg);
 }
 
+.form-section .section-sub {
+  margin-bottom: 32px;
+}
+
 .agent-form {
-  max-width: 560px;
+  max-width: 640px;
   margin: 0 auto;
   background: var(--bg-form);
   border: 1px solid var(--border);
@@ -476,14 +606,16 @@ h1, h2, h3 {
 
 .form-group label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-light);
   margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .form-group input,
-.form-group select {
+.form-group textarea {
   width: 100%;
   padding: 12px 16px;
   font-family: 'Inter', sans-serif;
@@ -497,31 +629,25 @@ h1, h2, h3 {
   appearance: none;
 }
 
-.form-group select {
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 16px center;
-  padding-right: 40px;
-}
-
 .form-group input:focus,
-.form-group select:focus {
+.form-group textarea:focus {
   outline: none;
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(200, 162, 60, 0.15);
 }
 
-.form-group input::placeholder {
+.form-group input::placeholder,
+.form-group textarea::placeholder {
   color: #aaa;
 }
 
 .form-group input.invalid,
-.form-group select.invalid {
+.form-group textarea.invalid {
   border-color: var(--error);
 }
 
 .form-group input.invalid:focus,
-.form-group select.invalid:focus {
+.form-group textarea.invalid:focus {
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
 }
 
@@ -544,6 +670,16 @@ h1, h2, h3 {
 
 .agent-form .btn {
   margin-top: 8px;
+}
+
+.form-note {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-light);
+  margin-top: 16px;
+  text-transform: uppercase;
 }
 
 .form-success {
@@ -615,7 +751,7 @@ h1, h2, h3 {
 
 /* --- Footer --- */
 .footer {
-  padding: 24px 0;
+  padding: 32px 0;
   background: var(--dark-deep);
   border-top: 1px solid rgba(255,255,255,0.06);
 }
@@ -624,12 +760,46 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .footer-logo {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.1rem;
   font-weight: 700;
+  color: #fff;
+}
+
+.footer-tagline {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-links a {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  transition: color var(--transition);
+}
+
+.footer-links a:hover {
   color: #fff;
 }
 
@@ -719,6 +889,12 @@ h1, h2, h3 {
     font-size: 0.95rem;
   }
 
+  .hero-badges {
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.65rem;
+  }
+
   /* Stats */
   .stats {
     padding: 48px 0;
@@ -783,8 +959,16 @@ h1, h2, h3 {
   /* Footer */
   .footer-container {
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
     text-align: center;
+  }
+
+  .footer-brand {
+    align-items: center;
+  }
+
+  .footer-links {
+    gap: 16px;
   }
 }
 

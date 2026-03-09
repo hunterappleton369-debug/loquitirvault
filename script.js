@@ -6,18 +6,18 @@
   'use strict';
 
   // --- DOM Elements ---
-  const navbar = document.getElementById('navbar');
-  const mobileToggle = document.getElementById('mobileToggle');
-  const navLinks = document.getElementById('navLinks');
-  const form = document.getElementById('agentForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const formSuccess = document.getElementById('formSuccess');
-  const formError = document.getElementById('formError');
+  var navbar = document.getElementById('navbar');
+  var mobileToggle = document.getElementById('mobileToggle');
+  var navLinks = document.getElementById('navLinks');
+  var form = document.getElementById('agentForm');
+  var submitBtn = document.getElementById('submitBtn');
+  var formSuccess = document.getElementById('formSuccess');
+  var formError = document.getElementById('formError');
 
-  const WEBHOOK_URL = 'https://hook.us2.make.com/x8lexiu5f4n6q174dbo6zrwwtrwcdwsn';
+  var WEBHOOK_URL = 'https://hook.us2.make.com/x8lexiu5f4n6q174dbo6zrwwtrwcdwsn';
 
   // --- Mobile Nav Overlay ---
-  let overlay = null;
+  var overlay = null;
 
   function createOverlay() {
     if (overlay) return;
@@ -102,8 +102,10 @@
     } else if (field.id === 'phone' && field.value.trim()) {
       var digits = field.value.replace(/\D/g, '');
       isValid = digits.length >= 10;
-    } else if (field.tagName === 'SELECT' && field.required) {
-      isValid = field.value !== '';
+    } else if (field.id === 'websiteUrl' && field.value.trim()) {
+      // Accept URLs with or without protocol, ports, paths, query strings
+      var url = field.value.trim();
+      isValid = /^(https?:\/\/)?[\w.-]+\.[a-z]{2,}/i.test(url);
     }
 
     if (isValid) {
@@ -118,10 +120,17 @@
   }
 
   function validateForm() {
-    var fields = form.querySelectorAll('input[required], select[required]');
+    var fields = form.querySelectorAll('input[required]');
     var allValid = true;
     fields.forEach(function (field) {
       if (!validateField(field)) {
+        allValid = false;
+      }
+    });
+    // Also validate optional fields that have values
+    var optionalFields = form.querySelectorAll('input:not([required])');
+    optionalFields.forEach(function (field) {
+      if (field.value.trim() && !validateField(field)) {
         allValid = false;
       }
     });
@@ -129,7 +138,7 @@
   }
 
   function setupLiveValidation() {
-    var fields = form.querySelectorAll('input, select');
+    var fields = form.querySelectorAll('input, select, textarea');
     fields.forEach(function (field) {
       field.addEventListener('blur', function () {
         validateField(this);
@@ -152,13 +161,13 @@
 
     if (!validateForm()) return;
 
-    // Collect data
+    // Collect data — new fields matching updated form
     var data = {
       fullName: document.getElementById('fullName').value.trim(),
-      businessName: document.getElementById('businessName').value.trim(),
       email: document.getElementById('email').value.trim(),
       phone: document.getElementById('phone').value.trim(),
-      industry: document.getElementById('industry').value
+      websiteUrl: document.getElementById('websiteUrl').value.trim(),
+      afterHoursAnswer: document.getElementById('afterHoursAnswer').value.trim()
     };
 
     // Show loading state
@@ -182,7 +191,7 @@
         form.querySelectorAll('.form-group').forEach(function (g) {
           g.classList.remove('has-error');
         });
-        form.querySelectorAll('input, select').forEach(function (f) {
+        form.querySelectorAll('input, select, textarea').forEach(function (f) {
           f.classList.remove('invalid');
         });
       })
@@ -205,13 +214,15 @@
     handleScroll();
 
     // Mobile nav toggle
-    mobileToggle.addEventListener('click', function () {
-      if (navLinks.classList.contains('open')) {
-        closeMobileNav();
-      } else {
-        openMobileNav();
-      }
-    });
+    if (mobileToggle) {
+      mobileToggle.addEventListener('click', function () {
+        if (navLinks.classList.contains('open')) {
+          closeMobileNav();
+        } else {
+          openMobileNav();
+        }
+      });
+    }
 
     // Smooth scroll
     handleAnchorClicks();
