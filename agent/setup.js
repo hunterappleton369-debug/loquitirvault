@@ -15,6 +15,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const Retell = require('retell-sdk');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 const REQUIRED_ENV = ['RETELL_API_KEY', 'CALCOM_API_KEY', 'CALCOM_EVENT_TYPE_ID', 'CALCOM_USERNAME'];
 
@@ -31,7 +32,13 @@ function validateEnv() {
 async function main() {
   validateEnv();
 
-  const retell = new Retell({ apiKey: process.env.RETELL_API_KEY });
+  // Use proxy if available (for containerized environments)
+  const proxyUrl = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
+  const clientOpts = { apiKey: process.env.RETELL_API_KEY };
+  if (proxyUrl) {
+    clientOpts.httpAgent = new HttpsProxyAgent(proxyUrl);
+  }
+  const retell = new Retell(clientOpts);
 
   // Load prompt and config
   const prompt = fs.readFileSync(path.join(__dirname, 'prompt.md'), 'utf-8');

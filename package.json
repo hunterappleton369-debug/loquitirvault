@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "https-proxy-agent": "^7.0.6",
     "retell-sdk": "^4.0.0"
   }
 }

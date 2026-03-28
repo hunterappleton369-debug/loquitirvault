@@ -8,7 +8,7 @@
   "backchannel_frequency": 0.7,
   "reminder_trigger_ms": 10000,
   "reminder_max_count": 2,
-  "ambient_sound": "office",
+  "ambient_sound": "call-center",
   "ambient_sound_volume": 0.3,
   "end_call_after_silence_ms": 15000,
   "max_call_duration_ms": 900000,

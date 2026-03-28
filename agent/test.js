@@ -14,6 +14,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const Retell = require('retell-sdk');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 function loadAgentInfo() {
   const infoPath = path.join(__dirname, '.agent-info.json');
@@ -110,7 +111,12 @@ async function main() {
     process.exit(1);
   }
 
-  const retell = new Retell({ apiKey: process.env.RETELL_API_KEY });
+  const proxyUrl = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
+  const clientOpts = { apiKey: process.env.RETELL_API_KEY };
+  if (proxyUrl) {
+    clientOpts.httpAgent = new HttpsProxyAgent(proxyUrl);
+  }
+  const retell = new Retell(clientOpts);
   const agentInfo = loadAgentInfo();
   const args = process.argv.slice(2);
 
