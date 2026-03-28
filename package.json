@@ -1,0 +1,22 @@
+{
+  "name": "loquitirvault-agents",
+  "version": "1.0.0",
+  "description": "Loquitir benefit-driven AI agents for home service businesses",
+  "type": "module",
+  "main": "agents/index.js",
+  "scripts": {
+    "start": "node agents/index.js",
+    "agent:never-miss-a-lead": "node agents/never-miss-a-lead.js",
+    "agent:qualify-before-you-drive": "node agents/qualify-before-you-drive.js",
+    "agent:booked-before-they-ghost": "node agents/booked-before-they-ghost.js",
+    "agent:estimate-to-revenue": "node agents/estimate-to-revenue.js",
+    "agent:objection-to-booking": "node agents/objection-to-booking.js",
+    "agent:recover-lost-revenue": "node agents/recover-lost-revenue.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
