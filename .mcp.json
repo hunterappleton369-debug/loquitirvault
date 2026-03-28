@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "retellai": {
+      "command": "npx",
+      "args": ["-y", "@abhaybabbar/retellai-mcp-server"],
+      "env": {
+        "RETELL_API_KEY": "${RETELL_API_KEY}"
+      }
+    }
+  }
+}

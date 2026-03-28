@@ -1,0 +1,27 @@
+{
+  "agent_name": "Loquitir Tree Service Agent",
+  "voice_id": "11labs-Adrian",
+  "language": "en-US",
+  "responsiveness": 0.6,
+  "interruption_sensitivity": 0.8,
+  "enable_backchannel": true,
+  "backchannel_frequency": 0.7,
+  "reminder_trigger_ms": 10000,
+  "reminder_max_count": 2,
+  "ambient_sound": "office",
+  "ambient_sound_volume": 0.3,
+  "end_call_after_silence_ms": 15000,
+  "max_call_duration_ms": 900000,
+  "voicemail_detection_timeout_ms": 20000,
+  "normalize_for_speech": true,
+  "opt_out_sensitive_data_storage": false,
+  "pronunciation_dictionary": [
+    { "word": "arborist", "pronunciation": "AR-buh-rist" }
+  ],
+  "cal_com": {
+    "event_slug": "consultation",
+    "timezone": "America/New_York",
+    "slot_days_ahead": 14,
+    "notes_prefix": "Tree Service Consultation"
+  }
+}

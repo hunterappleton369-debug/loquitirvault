@@ -1,0 +1,14 @@
+{
+  "name": "loquitirvault",
+  "version": "1.0.0",
+  "description": "Loquitir — AI Voice Agents for Local Businesses",
+  "private": true,
+  "scripts": {
+    "setup-agent": "node agent/setup.js",
+    "test-agent": "node agent/test.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "retell-sdk": "^4.0.0"
+  }
+}
