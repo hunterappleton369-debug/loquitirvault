@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Why Missing Calls Is An Arborist's Biggest Mistake</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+
+    #scene {
+      position: relative;
+      background: #f5f0e8;
+      overflow: hidden;
+      /* Fullscreen on mobile, capped on desktop */
+      width: 100vw;
+      height: 100vh;
+      max-width: 430px;
+      max-height: 932px;
+      /* Safe area for notch/home indicator */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    @media (min-width: 431px) {
+      #scene {
+        border-radius: 12px;
+        height: min(100vh, 932px);
+      }
+    }
+
+    canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+
+    /* Text overlays */
+    .overlay {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .overlay.visible { opacity: 1; }
+
+    #hook-text {
+      top: 6%;
+      padding: 0 7%;
+    }
+
+    #hook-text h1 {
+      font-size: clamp(22px, 6.5vw, 32px);
+      font-weight: 900;
+      color: #1a1a2e;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
+
+    #hook-text h1 span {
+      color: #cc0000;
+      display: block;
+      font-size: clamp(26px, 7.5vw, 36px);
+    }
+
+    #missed-label {
+      top: 58%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: auto;
+      white-space: nowrap;
+    }
+
+    #missed-label span {
+      background: #cc0000;
+      color: #fff;
+      font-size: clamp(14px, 4vw, 18px);
+      font-weight: 800;
+      padding: 8px 20px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    #cost-text {
+      top: 52%;
+      padding: 0 5%;
+    }
+
+    #cost-text .amount {
+      font-size: clamp(34px, 10vw, 48px);
+      font-weight: 900;
+      color: #cc0000;
+      display: block;
+      line-height: 1;
+      margin-bottom: 4px;
+      text-shadow: 0 2px 8px rgba(204, 0, 0, 0.3);
+    }
+
+    #cost-text .label {
+      font-size: clamp(13px, 3.5vw, 17px);
+      font-weight: 700;
+      color: #1a1a2e;
+      display: block;
+    }
+
+    #stat-text {
+      bottom: 14%;
+      padding: 0 7%;
+    }
+
+    #stat-text .stat-box {
+      background: rgba(26, 26, 46, 0.95);
+      border-radius: 12px;
+      padding: 24px 20px;
+      color: #fff;
+    }
+
+    #stat-text .stat-line {
+      font-size: clamp(13px, 3.5vw, 17px);
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.5;
+    }
+
+    #stat-text .big-number {
+      font-size: clamp(40px, 12vw, 58px);
+      font-weight: 900;
+      color: #cc0000;
+      display: block;
+      margin: 8px 0;
+      line-height: 1;
+    }
+
+    #stat-text .per-year {
+      font-size: clamp(16px, 4.5vw, 22px);
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    #cta-text {
+      bottom: calc(8% + env(safe-area-inset-bottom));
+      padding: 0 8%;
+    }
+
+    #cta-text .cta-box {
+      background: #C8A23C;
+      border-radius: 10px;
+      padding: 18px 24px;
+      color: #fff;
+      font-size: clamp(14px, 4vw, 18px);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 20px rgba(200, 162, 60, 0.5);
+    }
+
+    #cta-text .cta-sub {
+      margin-top: 12px;
+      font-size: clamp(11px, 3vw, 14px);
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    /* Pulse for big number */
+    @keyframes numberPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .pulse {
+      animation: numberPulse 0.8s ease-in-out infinite;
+      display: inline-block;
+    }
+
+    /* Phone ring animation */
+    @keyframes ringShake {
+      0%, 100% { transform: rotate(0deg); }
+      10% { transform: rotate(8deg); }
+      20% { transform: rotate(-8deg); }
+      30% { transform: rotate(6deg); }
+      40% { transform: rotate(-6deg); }
+      50% { transform: rotate(4deg); }
+      60% { transform: rotate(-4deg); }
+      70% { transform: rotate(2deg); }
+      80% { transform: rotate(-2deg); }
+      90% { transform: rotate(1deg); }
+    }
+
+    /* Replay button */
+    #replay {
+      position: absolute;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      background: rgba(26, 26, 46, 0.9);
+      color: #fff;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    #replay.visible {
+      opacity: 1;
+    }
+
+    #replay:hover,
+    #replay:active {
+      background: #C8A23C;
+    }
+  </style>
+</head>
+<body>
+
+<div id="scene">
+  <canvas id="canvas"></canvas>
+
+  <!-- Hook text -->
+  <div class="overlay" id="hook-text">
+    <h1>Why missing calls is an arborist's <span>biggest mistake</span></h1>
+  </div>
+
+  <!-- Missed call label -->
+  <div class="overlay" id="missed-label">
+    <span>MISSED CALL</span>
+  </div>
+
+  <!-- Cost text above phone -->
+  <div class="overlay" id="cost-text">
+    <span class="amount">- $1,500</span>
+    <span class="label">Tree Removal Job Gone</span>
+  </div>
+
+  <!-- Stat text -->
+  <div class="overlay" id="stat-text">
+    <div class="stat-box">
+      <span class="stat-line">1 missed job like that per week costs you</span>
+      <span class="big-number pulse">$84,000</span>
+      <span class="per-year">every single year</span>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="overlay" id="cta-text">
+    <div class="cta-box">Never miss a call again</div>
+    <div class="cta-sub">Loquitir answers every call 24/7</div>
+  </div>
+
+  <button id="replay">Replay</button>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const scene = document.getElementById('scene');
+
+  // --- Responsive sizing ---
+  let W = 400, H = 711, S = 1;
+  const dpr = window.devicePixelRatio || 1;
+
+  function resizeCanvas() {
+    W = scene.clientWidth;
+    H = scene.clientHeight;
+    S = W / 400; // scale factor (design basis = 400px wide)
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr * S, 0, 0, dpr * S, 0, 0);
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  // roundRect polyfill for older iOS Safari
+  if (!ctx.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+      if (typeof r === 'number') r = [r, r, r, r];
+      const [tl, tr, br, bl] = r;
+      this.moveTo(x + tl, y);
+      this.lineTo(x + w - tr, y);
+      this.quadraticCurveTo(x + w, y, x + w, y + tr);
+      this.lineTo(x + w, y + h - br);
+      this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+      this.lineTo(x + bl, y + h);
+      this.quadraticCurveTo(x, y + h, x, y + h - bl);
+      this.lineTo(x, y + tl);
+      this.quadraticCurveTo(x, y, x + tl, y);
+      this.closePath();
+    };
+  }
+
+  // --- State ---
+  let time = 0;
+  let phase = 0; // timeline phase
+  let phoneRinging = false;
+  let phoneRingTime = 0;
+  let arboristLookingDown = false;
+  let arboristSad = false;
+  let sawAngle = 0;
+  let leafOffsets = [];
+  let windTime = 0;
+
+  // Generate leaf positions for the tree
+  for (let i = 0; i < 35; i++) {
+    leafOffsets.push({
+      x: (Math.random() - 0.5) * 120,
+      y: (Math.random() - 0.5) * 100,
+      size: 8 + Math.random() * 14,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.5 + Math.random() * 1.5
+    });
+  }
+
+  // Logical height in design coords (400 wide, variable height)
+  function LH() { return H / S; }
+
+  // --- Drawing helpers ---
+  function drawSky() {
+    const lh = LH();
+    const grad = ctx.createLinearGradient(0, 0, 0, lh * 0.56);
+    grad.addColorStop(0, '#87CEEB');
+    grad.addColorStop(0.6, '#B0E0E6');
+    grad.addColorStop(1, '#f5f0e8');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 400, lh);
+  }
+
+  function drawGround() {
+    const lh = LH();
+    const groundY = lh * 0.745;
+    ctx.fillStyle = '#7cb342';
+    ctx.fillRect(0, groundY, 400, lh - groundY);
+
+    // Grass texture lines
+    ctx.strokeStyle = '#6aa336';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 30; i++) {
+      const x = Math.random() * 400;
+      const y = groundY + 5 + Math.random() * 30;
+      ctx.beginPath();
+      ctx.moveTo(x, y + 10);
+      ctx.quadraticCurveTo(x + 2, y - 5, x + 4, y + 8);
+      ctx.stroke();
+    }
+  }
+
+  function drawTree() {
+    // Trunk
+    ctx.fillStyle = '#5D4037';
+    ctx.fillRect(155, 250, 30, 280);
+
+    // Trunk texture
+    ctx.strokeStyle = '#4E342E';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      const y = 270 + i * 50;
+      ctx.beginPath();
+      ctx.moveTo(158, y);
+      ctx.lineTo(182, y + 10);
+      ctx.stroke();
+    }
+
+    // Branch (where arborist works)
+    ctx.fillStyle = '#5D4037';
+    ctx.beginPath();
+    ctx.moveTo(170, 310);
+    ctx.lineTo(280, 280);
+    ctx.lineTo(280, 290);
+    ctx.lineTo(170, 320);
+    ctx.closePath();
+    ctx.fill();
+
+    // Left branch
+    ctx.beginPath();
+    ctx.moveTo(170, 340);
+    ctx.lineTo(80, 300);
+    ctx.lineTo(80, 310);
+    ctx.lineTo(170, 350);
+    ctx.closePath();
+    ctx.fill();
+
+    // Leaves (canopy)
+    leafOffsets.forEach((leaf) => {
+      const sway = Math.sin(windTime * leaf.speed + leaf.phase) * (arboristSad ? 6 : 3);
+      const cx = 170 + leaf.x + sway;
+      const cy = 220 + leaf.y;
+
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, leaf.size, leaf.size * 0.7, 0, 0, Math.PI * 2);
+      const green = Math.floor(140 + Math.random() * 40);
+      ctx.fillStyle = `rgb(${40 + Math.floor(Math.random()*20)}, ${green}, ${30 + Math.floor(Math.random()*20)})`;
+      ctx.fill();
+    });
+  }
+
+  function drawStickArborist() {
+    const baseX = 240;
+    const baseY = 265;
+
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Hard hat
+    ctx.fillStyle = '#FFA000';
+    ctx.beginPath();
+    ctx.arc(baseX, baseY - 24, 10, Math.PI, 0);
+    ctx.fill();
+    ctx.fillRect(baseX - 14, baseY - 24, 28, 5);
+
+    // Head
+    ctx.fillStyle = '#FFCC80';
+    ctx.beginPath();
+    ctx.arc(baseX, baseY - 12, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Face
+    if (arboristSad || arboristLookingDown) {
+      // Sad / looking down face
+      // Eyes looking down
+      ctx.fillStyle = '#1a1a2e';
+      ctx.beginPath();
+      ctx.arc(baseX - 4, baseY - 10, 1.5, 0, Math.PI * 2);
+      ctx.arc(baseX + 4, baseY - 10, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sad mouth
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(baseX, baseY - 3, 4, 0.2 * Math.PI, 0.8 * Math.PI, true);
+      ctx.stroke();
+
+      // Head tilted down slightly
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineWidth = 3;
+    } else {
+      // Normal working face
+      ctx.fillStyle = '#1a1a2e';
+      ctx.beginPath();
+      ctx.arc(baseX - 4, baseY - 13, 1.5, 0, Math.PI * 2);
+      ctx.arc(baseX + 4, baseY - 13, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Neutral mouth
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(baseX - 3, baseY - 5);
+      ctx.lineTo(baseX + 3, baseY - 5);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineWidth = 3;
+    }
+
+    // Body
+    ctx.beginPath();
+    ctx.moveTo(baseX, baseY - 2);
+    ctx.lineTo(baseX, baseY + 30);
+    ctx.stroke();
+
+    // Legs on branch
+    ctx.beginPath();
+    ctx.moveTo(baseX, baseY + 30);
+    ctx.lineTo(baseX - 12, baseY + 50);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(baseX, baseY + 30);
+    ctx.lineTo(baseX + 12, baseY + 50);
+    ctx.stroke();
+
+    if (!arboristSad && !arboristLookingDown) {
+      // Working arms - sawing motion
+      const sawOff = Math.sin(sawAngle) * 8;
+      // Left arm holds branch
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY + 8);
+      ctx.lineTo(baseX - 20, baseY + 2);
+      ctx.stroke();
+      // Right arm sawing
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY + 8);
+      ctx.lineTo(baseX + 20 + sawOff, baseY + 15);
+      ctx.stroke();
+
+      // Saw
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(baseX + 20 + sawOff, baseY + 15);
+      ctx.lineTo(baseX + 38 + sawOff, baseY + 18);
+      ctx.stroke();
+
+      // Saw teeth
+      ctx.strokeStyle = '#aaa';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 4; i++) {
+        const sx = baseX + 22 + sawOff + i * 4;
+        ctx.beginPath();
+        ctx.moveTo(sx, baseY + 16);
+        ctx.lineTo(sx + 2, baseY + 19);
+        ctx.stroke();
+      }
+    } else {
+      // Arms hanging down sadly
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY + 8);
+      ctx.lineTo(baseX - 15, baseY + 28);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY + 8);
+      ctx.lineTo(baseX + 15, baseY + 28);
+      ctx.stroke();
+    }
+  }
+
+  function drawTable() {
+    const tx = 310;
+    const ty = 500;
+
+    // Table top
+    ctx.fillStyle = '#8D6E63';
+    ctx.fillRect(tx - 30, ty, 60, 6);
+
+    // Table legs
+    ctx.fillStyle = '#6D4C41';
+    ctx.fillRect(tx - 25, ty + 6, 5, 30);
+    ctx.fillRect(tx + 20, ty + 6, 5, 30);
+  }
+
+  function drawPhone(ringing) {
+    const px = 310;
+    const py = 488;
+
+    ctx.save();
+
+    if (ringing) {
+      // Vibrate effect
+      const shake = Math.sin(time * 30) * 2;
+      ctx.translate(shake, 0);
+
+      // Ring waves
+      ctx.strokeStyle = 'rgba(200, 162, 60, ' + (0.3 + Math.sin(time * 8) * 0.3) + ')';
+      ctx.lineWidth = 2;
+      for (let i = 1; i <= 3; i++) {
+        const r = 15 + i * 8 + Math.sin(time * 6) * 3;
+        ctx.beginPath();
+        ctx.arc(px, py - 5, r, -0.8, -0.2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(px, py - 5, r, 0.2 + Math.PI, 0.8 + Math.PI);
+        ctx.stroke();
+      }
+    }
+
+    // Phone body
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath();
+    ctx.roundRect(px - 12, py - 18, 24, 36, 4);
+    ctx.fill();
+
+    // Screen
+    if (ringing) {
+      ctx.fillStyle = '#4CAF50';
+    } else {
+      ctx.fillStyle = '#333';
+    }
+    ctx.fillRect(px - 9, py - 14, 18, 26);
+
+    // Screen content when ringing
+    if (ringing) {
+      ctx.fillStyle = '#fff';
+      ctx.font = '600 5px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('INCOMING', px, py - 6);
+      ctx.fillText('CALL', px, py);
+
+      // Phone icon
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(px, py + 6, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#4CAF50';
+      ctx.font = '700 5px Inter, sans-serif';
+      ctx.fillText('\u260E', px, py + 8);
+    }
+
+    ctx.restore();
+  }
+
+  function drawFallingLeaves() {
+    if (!arboristSad) return;
+    const groundY = LH() * 0.745;
+
+    // A few leaves drifting down
+    ctx.fillStyle = 'rgba(76, 175, 80, 0.6)';
+    for (let i = 0; i < 5; i++) {
+      const t = (time * 0.5 + i * 1.3) % 4;
+      const lx = 140 + i * 50 + Math.sin(time + i) * 20;
+      const ly = 300 + t * 60;
+      if (ly < groundY) {
+        ctx.save();
+        ctx.translate(lx, ly);
+        ctx.rotate(time * 2 + i);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 5, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+
+  function drawDollarSigns() {
+    if (!arboristSad) return;
+    const groundY = LH() * 0.745;
+
+    ctx.font = '700 18px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(204, 0, 0, 0.15)';
+    ctx.textAlign = 'center';
+
+    for (let i = 0; i < 6; i++) {
+      const dx = 40 + i * 70;
+      const dy = groundY + 50 + Math.sin(time * 1.5 + i) * 15;
+      ctx.fillText('$', dx, dy);
+    }
+  }
+
+  // --- Overlay controls ---
+  const hookText = document.getElementById('hook-text');
+  const missedLabel = document.getElementById('missed-label');
+  const costText = document.getElementById('cost-text');
+  const statText = document.getElementById('stat-text');
+  const ctaText = document.getElementById('cta-text');
+  const replayBtn = document.getElementById('replay');
+
+  function hideAll() {
+    [hookText, missedLabel, costText, statText, ctaText].forEach(el => {
+      el.classList.remove('visible');
+    });
+    replayBtn.classList.remove('visible');
+  }
+
+  function show(el) { el.classList.add('visible'); }
+  function hide(el) { el.classList.remove('visible'); }
+
+  // --- Timeline ---
+  // Phase 0: 0-3.5s   - Hook text + tree scene builds
+  // Phase 1: 3.5-7s   - Hook fades, arborist is sawing
+  // Phase 2: 7-11s    - Phone rings, arborist notices
+  // Phase 3: 11-13s   - Phone stops, MISSED CALL
+  // Phase 4: 13-16s   - $1500 removal flashes
+  // Phase 5: 16-22s   - Big stat: $84,000
+  // Phase 6: 22-26s   - CTA
+
+  let startTime = null;
+  let animating = true;
+
+  function updateTimeline(elapsed) {
+    if (elapsed < 3.5) {
+      // Phase 0: Show hook
+      show(hookText);
+      phoneRinging = false;
+      arboristLookingDown = false;
+      arboristSad = false;
+    } else if (elapsed < 7) {
+      // Phase 1: Hook fades, arborist works
+      hide(hookText);
+      phoneRinging = false;
+      arboristLookingDown = false;
+      arboristSad = false;
+    } else if (elapsed < 11) {
+      // Phase 2: Phone rings
+      phoneRinging = true;
+      if (elapsed > 8.5) {
+        arboristLookingDown = true;
+      }
+    } else if (elapsed < 13) {
+      // Phase 3: Missed call
+      phoneRinging = false;
+      arboristLookingDown = true;
+      arboristSad = true;
+      show(missedLabel);
+    } else if (elapsed < 16) {
+      // Phase 4: $1500 flash
+      hide(missedLabel);
+      show(costText);
+      arboristSad = true;
+    } else if (elapsed < 22) {
+      // Phase 5: Big stat
+      hide(costText);
+      show(statText);
+      arboristSad = true;
+    } else if (elapsed < 27) {
+      // Phase 6: CTA
+      hide(statText);
+      show(ctaText);
+      arboristSad = false;
+      arboristLookingDown = false;
+    } else {
+      // Done
+      show(ctaText);
+      replayBtn.classList.add('visible');
+    }
+  }
+
+  // --- Main loop ---
+  function animate(timestamp) {
+    if (!animating) return;
+
+    if (startTime === null) startTime = timestamp;
+    const elapsed = (timestamp - startTime) / 1000;
+    time = elapsed;
+    windTime = elapsed;
+    sawAngle = elapsed * 6;
+
+    // Clear
+    ctx.clearRect(0, 0, 400, LH());
+
+    // Draw scene
+    drawSky();
+    drawGround();
+    drawTree();
+    drawStickArborist();
+    drawTable();
+    drawPhone(phoneRinging);
+    drawFallingLeaves();
+    drawDollarSigns();
+
+    // Timeline
+    updateTimeline(elapsed);
+
+    requestAnimationFrame(animate);
+  }
+
+  // --- Start ---
+  function startAnimation() {
+    hideAll();
+    startTime = null;
+    animating = true;
+    phoneRinging = false;
+    arboristLookingDown = false;
+    arboristSad = false;
+    requestAnimationFrame(animate);
+  }
+
+  replayBtn.addEventListener('click', startAnimation);
+
+  startAnimation();
+
+})();
+</script>
+</body>
+</html>
